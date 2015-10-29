@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Service Worker Missing Event Message Source</title>
+<script>
+navigator.serviceWorker.register('service-worker.js');
+navigator.serviceWorker.ready.then(function(registration) {
+  registration.active.postMessage('hi');
+});
+</script>
+</head>
+<body>
+</body>
+</html>
