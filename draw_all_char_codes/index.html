@@ -1,0 +1,62 @@
+
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <style>
+    @font-face {
+    font-family: UnicodeGetaBMP;
+    src: url(UnicodeGetaBMP.otf);
+    }</style>
+    <script type="text/javascript">
+    var total = 0xFFFF;
+    var height = 3000;
+    function next(start) {
+      var canvas = document.createElement('canvas');
+      ctx = canvas.getContext('2d');
+      document.body.appendChild(canvas);
+      canvas.width = 1000;
+      canvas.height = height;
+      document.getElementById('progress').textContent = start + ' of ' + total;
+      setTimeout(() => {
+        go2(start, ctx);
+      }, 10);
+    }
+    function go2(start, ctx) {
+      var advanceX = 30;
+      var advanceY = 50;
+      var x = 0;
+      var y = 100;
+      for (var i = start; i < total; i++) {
+        ctx.rect(x, y, advanceX - 2, advanceY - 2);
+        ctx.stroke();
+        ctx.font = "10px arial";
+        ctx.fillText(i.toString(16), x, y + 10);
+        ctx.font = "10px UnicodeGetaBMP";
+        ctx.fillText(String.fromCharCode(i), x + 5, y + 30);
+        x += advanceX;
+        if (x > 1000 - advanceX) {
+          x = 0;
+          y += advanceY;
+        }
+        if (y > height) {
+          setTimeout(() => {
+            next(i);
+          });
+          return;
+        }
+      }
+      document.getElementById('progress').textContent = i + ' of ' + total;
+    }
+    function go() {
+      setTimeout(() => {
+        next(0);
+      }, 1000);
+    }
+    </script>
+  </head>
+  <body onload="go()">
+    <h1> Draw all char codes from 0 to 0xFFFF with a font that maps all to an equals sign</h1>
+    <div id="progress"></div>
+    <div style="font: 10px UnicodeGetaBMP">Forcing the font to load....</div>
+  </body>
+</html>
