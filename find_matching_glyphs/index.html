@@ -1,0 +1,113 @@
+
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <style>
+    @font-face {
+    font-family: UnicodeGetaBMP;
+    src: url(UnicodeGetaBMP.otf);
+    }</style>
+    <script type="text/javascript">
+    let glyphs = [];
+    function test(charCode, ctx) {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = 'black';
+      ctx.font = "10px UnicodeGetaBMP";
+      ctx.fillText(String.fromCharCode(charCode), 5, 30);
+      let imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+      let found = false;
+      let data = imageData.data;
+      for (let glyph of glyphs) {
+        let testData = glyph.data;
+        found = true;
+        for (let i = 0; i < data.length; i++) {
+          if (data[i] !== testData[i]) {
+            found = false;
+            break;
+          }
+        }
+        if (found) {
+          glyph.charCodes.push(charCode);
+          break;
+        }
+      }
+      if (!found) {
+        glyphs.push({
+          charCodes: [charCode],
+          data,
+          dataUrl: ctx.canvas.toDataURL()
+        });
+      }
+    }
+    function collapseRanges(numbers) {
+      let ranges = [];
+      let rangeStart = numbers[0];
+      for (let i = 0; i < numbers.length; i++) {
+        if (numbers[i] + 1 === numbers[i + 1]) {
+          continue;
+        }
+        ranges.push([rangeStart, numbers[i]]);
+        rangeStart = numbers[i + 1];
+      }
+      return ranges;
+    }
+    let glyphCharCodeDivs = [];
+    let resultsDiv;
+    function render(glyphs) {
+      for (let i = 0; i < glyphs.length; i++) {
+        let glyph = glyphs[i];
+        let glyphCharCodesDiv = glyphCharCodeDivs[i];
+        if (!glyphCharCodesDiv) {
+          let glyphDiv = document.createElement('div');
+          glyphDiv.style.border = "1px solid black";
+          glyphDiv.style.margin = "1px";
+          glyphCharCodesDiv = document.createElement('div');
+          let glyphImage = document.createElement('img');
+          glyphImage.src = glyph.dataUrl;
+          glyphDiv.appendChild(glyphCharCodesDiv);
+          glyphDiv.appendChild(glyphImage);
+          resultsDiv.appendChild(glyphDiv);
+          glyphCharCodeDivs[i] = glyphCharCodesDiv;
+        }
+        glyphCharCodesDiv.textContent = JSON.stringify(collapseRanges(glyph.charCodes)) /*+ JSON.stringify(glyph.charCodes)*/;
+      }
+    }
+    const total = 0xFFFF;
+    let progressDiv;
+    function iterate(i, ctx) {
+      if (i >= total) {
+        return;
+      }
+      const chunk = 100;
+      let start = i;
+      for (; i < start + chunk && i < total; i++) {
+        test(i, ctx);
+      }
+      render(glyphs);
+      progressDiv.textContent = i + ' of ' + total;
+      setTimeout(() => {
+        iterate(i, ctx);
+      });
+    }
+    function go() {
+      progressDiv = document.getElementById('progress');
+      resultsDiv = document.getElementById('results');
+      let canvas = document.createElement('canvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = 50;
+      canvas.height = 50;
+      setTimeout(() => {
+        iterate(0, ctx);
+      }, 1000);
+    }
+    </script>
+  </head>
+  <body onload="go()">
+    <h1>Find all glyphs that render the same</h1>
+    <div id="progress"></div>
+    <div>Forcing the font to load.</div>
+    <div>Space should be a single vertical bar and everything else should be an equals symbol e.g. "abc 123" is"<span style="font: 10px UnicodeGetaBMP">abc 123</span>"</div>
+    <div id="results"></div>
+  </body>
+</html>
