@@ -94,6 +94,7 @@
       progressDiv = document.getElementById('progress');
       resultsDiv = document.getElementById('results');
       let canvas = document.createElement('canvas');
+      document.getElementById('useragent').textContent = navigator.userAgent;
       ctx = canvas.getContext('2d');
       canvas.width = 50;
       canvas.height = 50;
@@ -107,6 +108,8 @@
     <h1>Find all glyphs that render the same</h1>
     <div>This test uses a font that I modified <a href="http://blogs.adobe.com/CCJKType/2012/05/breaking-64k-glyph-barrier.html">from Adobe</a>. The font has three glyphs: 1) a box with an X mapped to <i>notdef</i>, 2) a single vertical bar that is mapped to <i>space</i>, 3) an equals symbol that all other char codes are mapped to. The test then draws char codes 0x0000 to 0xFFFF to canvas and compares the result of each glyph and then groups ones that come out the same. The number in square brackets below are the char code ranges that look the same for subsequent glyph.</div>
     <div>e.g. "abc 123" is"<span style="font: 10px UnicodeGetaBMP">abc 123</span>"</div>
+    <br>
+    <div>User Agent: <span id="useragent"></span></div>
     <br>
     <div id="progress"></div>
     <div id="results"></div>
